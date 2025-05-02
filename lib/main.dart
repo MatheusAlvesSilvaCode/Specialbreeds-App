@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'routes.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:app_specialbreeds/screens/MainScreen.dart';
+import 'package:app_specialbreeds/services/routes.dart'; // Caminho corrigido
 
 void main() {
   runApp(const MyApp());
@@ -12,6 +14,15 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Special Breeds',
+      debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('pt', 'BR'), // Português do Brasil
+      ],
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.amber,

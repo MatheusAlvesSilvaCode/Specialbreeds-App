@@ -1,19 +1,23 @@
 name: app_specialbreeds
 description: Um aplicativo para gerenciamento de creche de cães.
+
 publish_to: 'none'
 version: 1.0.0+1
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
+  flutter: '>=3.0.0'
 
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.2
+  cupertino_icons: ^1.0.6
   table_calendar: ^3.0.9
   image_picker: ^1.0.7
   shared_preferences: ^2.2.2
-  intl: ^0.18.1
+  intl: ^0.19.0
+  flutter_localizations:
+    sdk: flutter
 
 dev_dependencies:
   flutter_test:
@@ -22,8 +26,9 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-  
   assets:
     - assets/images/banner1.png
+    - assets/images/banner2.png
+    - assets/images/sample_dog.jpg
     - assets/images/logo.jpg
     - assets/images/dog.png

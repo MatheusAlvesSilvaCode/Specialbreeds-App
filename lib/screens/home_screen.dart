@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:app_specialbreeds/screens/booking_screen.dart';
 import 'package:flutter/material.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -8,8 +10,10 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  int _selectedIndex = 0;
   int _currentBannerIndex = 0;
+  int _selectedBottomNavIndex = 0; // Índice para o menu inferior
+  Timer? _bannerTimer;
+  final PageController _pageController = PageController();
 
   final List<Map<String, dynamic>> _banners = [
     {
@@ -21,9 +25,9 @@ class _HomeScreenState extends State<HomeScreen> {
       'color2': Color(0xFFFFF6E7),
     },
     {
-      'title': 'SPECIAL CARE',
-      'subtitle': 'Premium care for your pet',
-      'discount': '30% OFF',
+      'title': 'Nós',
+      'subtitle': 'Conheça nosso espaço',
+      'discount': 'Novidades',
       'image': 'assets/images/banner2.png',
       'color1': Color(0xFFFFF6E7),
       'color2': Color(0xFFFFE5EC),
@@ -35,19 +39,19 @@ class _HomeScreenState extends State<HomeScreen> {
       'title': 'Creche',
       'icon': Icons.pets,
       'color': Color(0xFFE0F4FF),
-      'iconColor': Color(0xFF4FB6FF),
+      'iconColor': Colors.amber,
     },
     {
       'title': 'Hospedagem',
       'icon': Icons.hotel,
       'color': Color(0xFFFFE5EC),
-      'iconColor': Color(0xFFFF6B93),
+      'iconColor': Colors.amber,
     },
     {
       'title': 'Adestramento',
       'icon': Icons.school,
       'color': Color(0xFFF4EEFC),
-      'iconColor': Color(0xFF9747FF),
+      'iconColor': Colors.amber,
     },
   ];
 
@@ -77,6 +81,52 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _startBannerTimer();
+  }
+
+  @override
+  void dispose() {
+    _bannerTimer?.cancel();
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _startBannerTimer() {
+    _bannerTimer = Timer.periodic(Duration(seconds: 4), (timer) {
+      if (mounted) {
+        final nextPage = _currentBannerIndex + 1;
+        if (nextPage >= _banners.length) {
+          _pageController.animateToPage(
+            0,
+            duration: Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        } else {
+          _pageController.nextPage(
+            duration: Duration(milliseconds: 500),
+            curve: Curves.easeInOut,
+          );
+        }
+      }
+    });
+  }
+
+  void _onBottomNavItemTapped(int index) {
+    if (index == 1) { // Somente para o botão Agendar
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => BookingScreen()),
+      );
+    } else {
+      setState(() {
+        _selectedBottomNavIndex = index;
+      });
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.grey[50],
@@ -95,7 +145,27 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
-      bottomNavigationBar: _buildBottomNavigationBar(),
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedBottomNavIndex,
+        onTap: _onBottomNavItemTapped,
+        type: BottomNavigationBarType.fixed,
+        selectedItemColor: Colors.amber,
+        unselectedItemColor: Colors.grey[400],
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_month),
+            label: 'Agendar',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.pets),
+            label: 'Pets',
+          ),
+        ],
+      ),
     );
   }
 
@@ -120,7 +190,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: IconButton(
                   icon: Icon(
                     Icons.person,
-                    color: const Color(0xFF011F4C),
+                    color: Colors.amber,
                   ),
                   onPressed: () {},
                 ),
@@ -138,11 +208,14 @@ class _HomeScreenState extends State<HomeScreen> {
         SizedBox(
           height: 180,
           child: PageView.builder(
+            controller: _pageController,
             itemCount: _banners.length,
             onPageChanged: (index) {
               setState(() {
                 _currentBannerIndex = index;
               });
+              _bannerTimer?.cancel();
+              _startBannerTimer();
             },
             itemBuilder: (context, index) {
               final banner = _banners[index];
@@ -250,32 +323,38 @@ class _HomeScreenState extends State<HomeScreen> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text("Instruções para Hospedagem"),
+          title: Text("Bem-vindos à Special Breeds Hospedagem para Pets!"),
           content: SingleChildScrollView(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  "Para garantir uma estadia confortável e segura para seu pet, siga estas instruções:",
+                  "Na Special Breeds, entendemos a importância de proporcionar um ambiente seguro e acolhedor para os seus pets. Nossa hospedagem oferece:",
                   style: TextStyle(fontWeight: FontWeight.bold),
                 ),
                 SizedBox(height: 10),
-                Text("1. Documentação Necessária:"),
-                Text("   - Carteira de vacinação atualizada"),
-                Text("   - Comprovante de antipulgas e vermífugos"),
-                SizedBox(height: 10),
-                Text("2. Itens para Trazer:"),
-                Text("   - Ração habitual do pet (em quantidade suficiente)"),
-                Text("   - Brinquedos preferidos"),
-                Text("   - Cama ou cobertor com cheiro familiar"),
-                SizedBox(height: 10),
-                Text("3. Recomendações:"),
-                Text("   - Chegar no horário agendado"),
-                Text("   - Informar sobre qualquer condição de saúde"),
-                Text("   - Deixar um contato para emergências"),
+                Text("- Ambiente Seguro: Nossa instalação é projetada para garantir a segurança dos seus pets, sem rotas de fuga e com supervisão 24 horas."),
+                Text("- Monitoramento por Câmera: Nossa sala de hospedagem é equipada com câmeras, para nós acompanharmos o bem-estar do seu pet."),
+                Text("- Conforto: Oferecemos caminhas e mantas confortáveis para garantir que seu pet se sinta em casa."),
+                SizedBox(height: 15),
+                Text(
+                  "Como Funciona:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 5),
+                Text("1. Cadastro Fácil: Faça o seu cadastro em nosso aplicativo intuitivo."),
+                Text("2. Escolha as Datas: Selecione as datas de check-in e check-out que melhor se adequam ao seu planejamento."),
+                SizedBox(height: 15),
+                Text(
+                  "Importante:",
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                SizedBox(height: 5),
+                Text("- Vacinação: É necessário que o pet esteja com todas as vacinas em dia."),
+                Text("- Controle de Pulgas: Também exigimos que os pets estejam com o controle de pulgas atualizado."),
                 SizedBox(height: 10),
                 Text(
-                  "Qualquer dúvida, entre em contato conosco!",
+                  "Nossa equipe está ansiosa para receber o seu pet e proporcionar o melhor cuidado possível. Entre em contato conosco para mais informações ou para tirar qualquer dúvida. Estamos aqui para ajudar!",
                   style: TextStyle(fontStyle: FontStyle.italic),
                 ),
               ],
@@ -408,7 +487,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           appointment['time'],
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
-                            color: Colors.blue,
+                            color: Colors.amber,
                           ),
                         ),
                       ],
@@ -508,7 +587,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     Icon(
                       category['icon'],
                       size: 40,
-                      color: const Color(0xFF011F4C),
+                      color: Colors.amber,
                     ),
                     const SizedBox(height: 8),
                     Text(
@@ -526,47 +605,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildBottomNavigationBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: const Offset(0, -3),
-          ),
-        ],
-      ),
-      child: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color(0xFF011F4C),
-        unselectedItemColor: Colors.grey[400],
-        items: const [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Home',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_month),
-            label: 'Agendar',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.pets),
-            label: 'Pets',
-          ),
-        ],
-      ),
     );
   }
 }
